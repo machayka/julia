@@ -21,7 +21,7 @@ export const CardStack = ({
   scaleFactor?: number;
 }) => {
   const CARD_OFFSET = offset || 15;
-  const SCALE_FACTOR = scaleFactor || 0.06;
+  const SCALE_FACTOR = scaleFactor || 0.16;
   const [cards, setCards] = useState<Card[]>(items);
 
   useEffect(() => {
@@ -49,14 +49,24 @@ export const CardStack = ({
             style={{
               transformOrigin: "top center",
             }}
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0.9 }}
             animate={{
-              top: index * -CARD_OFFSET,
-              scale: 1 - index * SCALE_FACTOR, // decrease scale for cards that are behind
-              zIndex: cards.length - index, //  decrease z-index for the cards that are behind
+              top: [
+                index * -CARD_OFFSET,
+                index * -CARD_OFFSET - 25,
+                index * -CARD_OFFSET,
+              ],
+              scale: 1 - index * SCALE_FACTOR,
+              zIndex: cards.length - index,
               opacity: 1,
+              rotateX: 10,
             }}
-            transition={{ duration: 0.3 }}
+            transition={{
+              times: [0.5, 2, 1],
+              duration: 1,
+              type: "spring",
+              bounce: 0.4,
+            }}
           >
             <div className="font-normal text-neutral-700 dark:text-neutral-200">
               {card.content}
