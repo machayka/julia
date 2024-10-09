@@ -1,10 +1,29 @@
-import { collection, getFirestore, onSnapshot } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
+import {
+  collection,
+  DocumentData,
+  getFirestore,
+  onSnapshot,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 
+// Import Firebase Timestamp (używane dla dat)
+import { Timestamp } from "firebase/firestore";
+
+export type Recommendation = {
+  id: string;
+  description: string;
+  name: string;
+  role: string;
+  date: Timestamp;
+  rate: number;
+  link?: string;
+};
+
 const useRecommendations = () => {
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<FirebaseError | null>(null);
 
   useEffect(() => {
     const db = getFirestore();
@@ -13,16 +32,18 @@ const useRecommendations = () => {
     const unsubscribe = onSnapshot(
       recommendationsRef,
       (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        // setRecommendations(data);
+        const data: Recommendation[] = snapshot.docs.map(
+          (doc: DocumentData) => ({
+            id: doc.id, // Przypisanie id z dokumentu Firestore
+            ...doc.data(),
+          })
+        );
+        setRecommendations(data);
         setLoading(false);
       },
-      (error) => {
+      (error: FirebaseError) => {
         console.error("Error fetching recommendations: ", error);
-        // setError(error);
+        setError(error);
         setLoading(false);
       }
     );
@@ -30,7 +51,6 @@ const useRecommendations = () => {
     // Cleanup: odsubskrybowanie, gdy komponent zostanie unmountowany
     return () => unsubscribe();
   }, []);
-
   return { recommendations, loading, error };
 };
 

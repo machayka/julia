@@ -1,87 +1,102 @@
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
-let interval: any;
-
 type Card = {
-  id: number;
+  id: string;
   name: string;
   designation: string;
   content: React.ReactNode;
+  link: string | undefined;
+  image: string;
 };
 
-export const CardStack = ({
+export const CardRotator = ({
   items,
-  offset,
-  scaleFactor,
+  intervalTime = 5000,
 }: {
   items: Card[];
-  offset?: number;
-  scaleFactor?: number;
+  intervalTime?: number;
 }) => {
-  const CARD_OFFSET = offset || 15;
-  const SCALE_FACTOR = scaleFactor || 0.16;
-  const [cards, setCards] = useState<Card[]>(items);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false); // Stan do sprawdzania, czy jest hover
 
   useEffect(() => {
-    startFlipping();
+    if (isHovered) return; // Wstrzymanie, gdy karta jest pod myszką
 
-    return () => clearInterval(interval);
-  }, []);
-  const startFlipping = () => {
-    interval = setInterval(() => {
-      setCards((prevCards: Card[]) => {
-        const newArray = [...prevCards]; // create a copy of the array
-        newArray.unshift(newArray.pop()!); // move the last element to the front
-        return newArray;
-      });
-    }, 5000);
-  };
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) =>
+        prevIndex === items.length - 1 ? 0 : prevIndex + 1
+      );
+    }, intervalTime);
+
+    return () => clearInterval(interval); // Cleanup interval on unmount
+  }, [items, intervalTime, isHovered]);
+
+  const currentCard = items[currentIndex];
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
 
   return (
-    <div className="relative  h-60 w-full mx-2 md:h-60">
-      {cards.map((card, index) => {
-        return (
-          <motion.div
-            key={card.id}
-            className="absolute dark:bg-black bg-white h-60 w-fit mx-2 rounded-3xl p-4 shadow-xl border border-neutral-200 dark:border-white/[0.1]  shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between"
-            style={{
-              transformOrigin: "top center",
-            }}
-            initial={{ opacity: 0.9 }}
-            animate={{
-              top: [
-                index * -CARD_OFFSET,
-                index * -CARD_OFFSET - 25,
-                index * -CARD_OFFSET,
-              ],
-              scale: 1 - index * SCALE_FACTOR,
-              zIndex: cards.length - index,
-              opacity: 1,
-              rotateX: 10,
-            }}
-            transition={{
-              times: [0.5, 2, 1],
-              duration: 1,
-              type: "spring",
-              bounce: 0.4,
-            }}
-          >
-            <div className="font-normal text-neutral-700 dark:text-neutral-200">
-              {card.content}
-            </div>
-            <div>
-              <p className="text-neutral-500 font-medium dark:text-white">
-                {card.name}
-              </p>
-              <p className="text-neutral-400 font-normal dark:text-neutral-200">
-                {card.designation}
-              </p>
-            </div>
-          </motion.div>
-        );
-      })}
+    <div
+      className="relative h-60 w-full mx-2 md:h-60"
+      onMouseEnter={handleMouseEnter} // Zatrzymanie automatycznego przełączania na hover
+      onMouseLeave={handleMouseLeave} // Wznowienie automatycznego przełączania po opuszczeniu
+    >
+      <motion.div
+        key={currentCard.id}
+        className={`relative dark:bg-black bg-white h-fit mx-2 rounded-3xl p-4 shadow-xl border ${
+          isHovered ? "border-neutral-300 bg-zinc-50" : "border-neutral-200"
+        } transition-colors duration-300 ease-in-out dark:border-white/[0.1] shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between`}
+        style={{
+          transformOrigin: "top center",
+        }}
+        initial={{ opacity: 0, scale: 0.8, rotateX: -10 }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          rotateX: 0,
+        }}
+        exit={{ opacity: 0, scale: 0.8, rotateX: 10 }}
+        transition={{
+          delay: 0.1,
+          duration: 0.8,
+          type: "spring",
+          bounce: 0.3,
+        }}
+      >
+        <div className="font-normal text-neutral-700 dark:text-neutral-200 mb-8">
+          {currentCard.content}
+        </div>
+        <div className="flex">
+          <div className="min-w-12">
+            <Image
+              height={100}
+              width={100}
+              src={currentCard.image}
+              alt={currentCard.name}
+              className="object-cover !m-0 !p-0 object-top rounded-full h-8 w-8 border-2 group-hover:scale-105 group-hover:z-30 border-white relative transition duration-500"
+            />
+          </div>
+
+          <div className="ml-3">
+            <a
+              className={`text-neutral-500 dark:text-white font-semibold ${
+                currentCard.link && "underline"
+              }`}
+              href={currentCard.link}
+              target="_blank"
+            >
+              {currentCard.name}
+            </a>
+            <p className="text-neutral-400 dark:text-neutral-200 font-light opacity-75 text-sm mt-1">
+              {currentCard.designation}
+            </p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

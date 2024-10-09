@@ -9,7 +9,7 @@ interface Props {
 
 export const Background: React.FC<Props> = ({ children }) => {
   return (
-    <>
+    <div style={{ height: 1190 }}>
       <Spotlight
         className="-top-40 left-0 md:left-60 md:-top-20"
         fill="white"
@@ -28,11 +28,11 @@ export const Background: React.FC<Props> = ({ children }) => {
             duration: 0.5,
             ease: [0.4, 0.0, 0.2, 1],
           }}
-          className="text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto "
+          className="h-fit text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto "
         >
           {children}
         </motion.h1>
       </HeroHighlight>
-    </>
+    </div>
   );
 };

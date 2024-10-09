@@ -11,13 +11,19 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-export function Avatar() {
+export function Avatar({
+  recommendationsLength,
+}: {
+  recommendationsLength: number;
+}) {
   const [hovered, setHovered] = useState<boolean>(false);
   const springConfig = { stiffness: 100, damping: 5 };
   const x = useMotionValue(0);
 
   useEffect(() => {
-    setHovered(true);
+    if (recommendationsLength !== 0) {
+      setHovered(true);
+    } else return;
 
     const interval = setInterval(() => {
       const currentX = x.get();
@@ -33,7 +39,7 @@ export function Avatar() {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [x]);
+  }, [x, recommendationsLength]);
 
   // rotate the tooltip
   const rotate = useSpring(
@@ -84,10 +90,10 @@ export function Avatar() {
                 <div className="absolute inset-x-10 z-30 w-[20%] -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px " />
                 <div className="absolute left-10 w-[40%] z-30 -bottom-px bg-gradient-to-r from-transparent via-sky-500 to-transparent h-px " />
                 <div className="font-normal text-white relative z-30 text-base underline">
-                  15 opinii
+                  {recommendationsLength} opinii
                 </div>
                 <div className="text-white text-xs">
-                  <Ratings rating={5} variant="yellow" totalStars={5} />
+                  <Ratings rating={5} variant="yellow" totalstars={5} />
                 </div>
               </motion.div>
             )}

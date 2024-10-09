@@ -1,5 +1,7 @@
+import "@/firebase/init-firebase";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Background } from "./components/Background";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -18,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={(inter.className, "bg-slate-100 dark:bg-black")}>
-        <Providers>{children}</Providers>
+        <Background>
+          <Providers>{children}</Providers>
+        </Background>
       </body>
     </html>
   );
